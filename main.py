@@ -7,10 +7,10 @@ import time
 import os
 from flask import Flask
 app=Flask(__name__)
-@app.route('/')
 
 
 def initLogin():
+    print("initializing login")
     url='http://jwstudent.lnu.edu.cn/login'
     option=webdriver.ChromeOptions()
     option.add_argument('--no-sandbox')
@@ -23,12 +23,16 @@ def initLogin():
 
 
 def loginSite(browser):
+    print("login in site")
     try_time=0
+    input_checkcode="input checkcode:"
     wrong_checkcode="Checkcode Wrong!"
+    right_checkcode="checkcode right!"
     while(1):
         try:
             input_id = browser.find_element(by=By.ID, value='input_username')
         except:
+            print(right_checkcode)
             break
         else:
             if(try_time):
@@ -47,7 +51,7 @@ def loginSite(browser):
             #pswd=inut()
             id='20202091116'
             pswd='Pander1234'
-            checkcode=input()
+            checkcode=input(input_checkcode)
 
             input_id.send_keys(id)
             input_pswd.send_keys(pswd)
@@ -65,6 +69,7 @@ def fetchCourseTable(browser):
     browser.get(url)
     time.sleep(1)
 
+    print("fetching coursetable:")
     coursetable=browser.find_element(by=By.ID,value='courseTable')
     coursetablecontect=coursetable.find_elements(by=By.TAG_NAME,value='td')
     for i in coursetablecontect:
@@ -72,15 +77,23 @@ def fetchCourseTable(browser):
     lst=[list_coursetable[i:i + col] for i in range(0, len(list_coursetable), col)]
     for i in range(1,6):
         lst.pop(i)
-
     for i in lst:
         print(i)
+    print("coursetable fetch success")
+    return lst
 
-
+@app.route('/login')
 def login():
+    list_coursetable=[]
     browser=initLogin()
     loginSite(browser)
-    fetchCourseTable(browser)
+    list_coursetable=fetchCourseTable(browser)
+    return str(list_coursetable)
+
+
+@app.route('/')
+def init():
+    return "<p>server init</p>"
 
 
 if __name__ == '__main__':
